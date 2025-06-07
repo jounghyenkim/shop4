@@ -1,5 +1,6 @@
 package com.shop3.shop3.controller;
 
+import com.shop3.shop3.dto.CountDto;
 import com.shop3.shop3.dto.ItemFormDto;
 import com.shop3.shop3.dto.ItemSearchDto;
 import com.shop3.shop3.entity.Item;
@@ -114,9 +115,10 @@ public class ItemController {
     }
 
     @GetMapping(value = "/item/{itemId}")
-    public String itemDtl(Model model, @PathVariable("itemId")Long itemId){
+    public String itemDtl(Model model, @PathVariable("itemId")Long itemId, CountDto countDto){
         ItemFormDto itemFormDto = itemService.getItemDtl(itemId);
         model.addAttribute("item",itemFormDto);
+        model.addAttribute("count",countDto);
 
         return "item/itemDtl";
     }

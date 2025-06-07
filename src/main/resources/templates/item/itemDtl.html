@@ -106,7 +106,35 @@
                 }
             });
         }
+// 카카오결제
+$(function(){
+    $("#btn-kakao-pay").click(function(){
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
+        // 필수입력값을 확인.
 
+        // 결제 정보를 form에 저장한다.
+         var itemId = $("#itemId").val();
+         var count = $("#count").val();
+              var paramData = {
+                itemId : $("#itemId").val(),
+                count : $("#count").val()
+            };
+        // 카카오페이 결제전송
+        $.ajax({
+                type:'get'
+                ,url:'/kakao/pay/' + itemId
+                ,data: paramData ,
+             beforeSend : function(xhr){
+                        /*데이터 전송하기 전에 헤더이 csrf 값을 설정*/
+                        xhr.setRequestHeader(header, token);
+                    },
+                    success:function(response){
+                    location.href = response.next_redirect_pc_url
+            }
+        })
+    })
+})
     </script>
 </th:block>
 
@@ -165,7 +193,8 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text">수량</span>
                     </div>
-                    <input type="number" name="count" id="count" class="form-control" value="1" min="1">
+
+                    <input type="number"  name="count" id="count" class="form-control" value="1" min="1">
                 </div>
             </div>
             <hr class="my-4">
@@ -177,6 +206,7 @@
             <div th:if="${item.itemSellStatus == T(com.shop3.shop3.constant.ItemSellStatus).SELL}" class="text-right">
                 <button type="button" class="btn btn-light border border-primary btn-lg" onclick="addCart()">장바구니 담기</button>
                 <button type="button" class="btn btn-primary btn-lg" onclick="order()">주문하기</button>
+                <input type="button" value="카카오페이"  id="btn-kakao-pay"/>
             </div>
             <div th:unless="${item.itemSellStatus == T(com.shop3.shop3.constant.ItemSellStatus).SELL}" class="text-right">
                 <button type="button" class="btn btn-danger btn-lg">품절</button>

@@ -27,6 +27,7 @@ public class ItemFormDto {
 
     private Integer stockNumber;
 
+    private Integer count; // 수량
     private ItemSellStatus itemSellStatus;
 
     private List<ItemImgDto> itemImgDtoList = new ArrayList<>(); // 상품 저장후 수정할때 상품 이미지 정보를 저장하는 리스트입니다.
