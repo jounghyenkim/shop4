@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layouts/layout1}">
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+    <style>
+
+    </style>
+</th:block>
+<div layout:fragment="content">
+
+    <div class="container col-7">
+        <div class="text-center mt-4 mb-4">
+            <h1>공지사항</h1>
+        </div>
+        <div class="row">
+            <div class="col">
+                <button class="btn btn-success float-end"
+                        onclick="location.href='/faq/write'" type="button"
+                        sec:authorize="isAuthenticated()">글 등록
+                </button>
+            </div>
+        </div>
+        <hr>
+        <div>
+            <table class="table table-hover text-start">
+                <thead>
+                <tr>
+                    <th class="col-2">ID</th>
+                    <th class="col-6">제목</th>
+                    <th class="col-2">작성자</th>
+                    <th class="col-2">등록일</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="list : ${boardList}">
+                    <td th:text="${list.id}"></td>
+                    <td>
+                        <a th:href="'/faq/detail/'+${list.id}" th:text="${list.title}"
+                           class="link-dark link-offset-2 link-offset-3-hover link-underline
+                                    link-underline-opacity-0 link-underline-opacity-75-hover"></a>
+                    </td>
+                    <td th:text="${list.writer}"></td>
+                    <td th:text="${list.localDate}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:with="start=${(boardList.number/maxPage)*maxPage +1},
+            end=(${(boardList.totalPages == 0) ? 1 : (start + (maxPage-1) < boardList.totalPages ?
+            start + (maxPage - 1) : boardList.totalPages)})">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${boardList.number eq 0}?'disabled' : 'defaultText'">
+                    <a th:href="${boardList.first} ? '#' :@{/faq/boardLists(page=${boardList.number})}"
+                       aria-label='Previous' class="page-link">
+                        <span aria-hidden="true">Previous</span>
+                    </a>
+                </li>
+                <li class="page-item" th:each="page: ${#numbers.sequence(start,end)}"
+                    th:classappend="${boardList.number eq page-1}?'active':'defaultText'">
+                    <a th:href="@{/faq/boardLists(page=${page})}"
+                       th:inline="text" class="page-link">[[${page}]]</a>
+                </li>
+                <li class="page-item" th:classappend="${boardList.number+1 ge boardList.totalPages}?'disabled' : 'defaultText'">
+                    <a th:href="${boardList.last} ? '#' : @{/faq/boardLists(page=${boardList.number + 2})}"
+                       aria-label="Next" class="page-link">
+                        <span aria-hidden="true">Next</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</html>

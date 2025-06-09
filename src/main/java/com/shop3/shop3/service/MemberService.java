@@ -72,4 +72,8 @@ public class MemberService implements UserDetailsService {
         }
         return null;
     }
+    public Member findMember(HttpSession httpSession, Principal principal) {
+        String email = loadMemberEmail(principal, httpSession);
+        return memberRepository.findByEmail(email);
+    }
 }

@@ -11,6 +11,9 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "member")
 @Getter
@@ -34,7 +37,8 @@ public class Member extends BaseEntity{
     private String tel;
     @Enumerated(EnumType.STRING)
     private Role role;
-
+    @OneToMany(mappedBy = "member",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Board> boardList = new ArrayList<>();
     public Member() {
 
     }

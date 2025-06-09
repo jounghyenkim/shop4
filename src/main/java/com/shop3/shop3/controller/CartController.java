@@ -83,7 +83,9 @@ public class CartController {
                                                        HttpSession httpSession){
         String email = memberService.loadMemberEmail(principal,httpSession);
         List<CartOrderDto> cartOrderDtoList = cartOrderDto.getCartOrderDtoList();
-        if (cartOrderDtoList == null || cartOrderDtoList.size() == 0){
+
+
+        if (cartOrderDtoList == null || cartOrderDtoList.isEmpty()){
             return new ResponseEntity<String>("주문할 상품을 선택해주세요",HttpStatus.FORBIDDEN);
         }
         for (CartOrderDto cartOrderDto1 : cartOrderDtoList){

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layouts/layout1}">
+    <head>
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    </head>
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            function mainCommentSave() {
+                let content = $(".mainCommentContent").val();
+                if (!content) {
+                    alert("내용을 입력하세요");
+                } else {
+                    var token = $("meta[name='_csrf']").attr("content");
+                    var header = $("meta[name='_csrf_header']").attr("content");
+
+                    let boardId = $("#boardId").val();
+                    let data = {
+                        "boardId" : boardId,
+                        "content" : content,
+                    };
+                    var param = JSON.stringify(data);
+                    $.ajax({
+                        url : "/comments/save",
+                        type : "post",
+                        contentType : "application/json",
+                        data : param,
+                        beforeSend : function(xhr) {
+                            xhr.setRequestHeader(header, token);
+                        },
+                        success : function (id) {
+                            alert("저장 하였습니다.");
+                            location.href='/faq/detail/' + id;
+                        },
+                        error : function(jqXHR, status, error) {
+                            if (jqXHR.status == '401') {
+                                alert("로그인 후 이용해 주세요.");
+                                location.href="/members/login";
+                            } else {
+                                alert(jqXHR.responseText);
+                            }
+                        }
+                    });
+                }
+            }
+            function commentDelete(val) {
+                let select = confirm("삭제 하시겠습니까?");
+                if (select) {
+                    var token = $("meta[name='_csrf']").attr("content");
+                    var header = $("meta[name='_csrf_header']").attr("content");
+                    let commentId = val.parentNode.dataset.id;
+                    var url = "/comments/delete/" + commentId;
+
+                    $.ajax({
+                        url : url,
+                        type : "delete",
+
+                        beforeSend : function(xhr) {
+                            xhr.setRequestHeader(header, token);
+                        },
+                        success : function (id) {
+                            alert("삭제 하였습니다.");
+                            location.href='/faq/detail/' + id;
+                        },
+                        error : function(jqXHR, status, error) {
+                            if (jqXHR.status == '400') {
+                                alert("알 수 없는 오류가 발생했습니다.");
+                            } else if (jqXHR.status == '401') {
+                                alert("로그인 후 이용해 주세요.");
+                                location.href="/members/login";
+                            } else if (jqXHR.status == '403') {
+                                alert("삭제 할 권한이 없습니다.");
+                            } else {
+                                alert(jqXHR.responseText);
+                            }
+                        }
+                    });
+                }
+            }
+            function commentUpdate(val) {
+                let content = val.parentNode.getElementsByTagName("textarea")[0].value;
+                let originalContent = val.parentNode.parentNode.getElementsByClassName("mainContent")[0]
+                                    .getElementsByTagName("span")[0].textContent;
+                if (!content) {
+                    alert("내용을 입력하세요.");
+                } else if (content == originalContent) {
+                    alert("변경된 내용이 없습니다.");
+                } else {
+                    var token = $("meta[name='_csrf']").attr("content");
+                    var header = $("meta[name='_csrf_header']").attr("content");
+
+                    let commentId = val.parentNode.parentNode.dataset.id;
+                    var url = "/comments/update/" + commentId + "?content=" + content;
+
+                    $.ajax({
+                        url : url,
+                        type : "patch",
+                        beforeSend : function(xhr) {
+                            xhr.setRequestHeader(header, token);
+                        },
+                        dataType : "json",
+                        cache : false,
+                        success : function (id) {
+                            alert("수정 하였습니다.");
+                            location.href='/faq/detail/' + id;
+                        },
+                        error : function(jqXHR, status, error) {
+                            if (jqXHR.status == '400') {
+                                alert("알 수 없는 오류가 발생했습니다.");
+                            } else if (jqXHR.status == '401') {
+                                alert("로그인 후 이용해 주세요.");
+                                location.href="/members/login";
+                            } else if (jqXHR.status == '403') {
+                                alert("수정 할 권한이 없습니다.");
+                            } else {
+                                alert(jqXHR.responseText);
+                            }
+                        },
+                    });
+                }
+            }
+            function subCommentSave(val) {
+                let content = val.parentNode.getElementsByTagName("textarea")[0].value;
+                if (!content) {
+                    alert("내용을 입력하세요");
+                } else {
+                    var token = $("meta[name='_csrf']").attr("content");
+                    var header = $("meta[name='_csrf_header']").attr("content");
+
+                    let parentId = val.parentNode.parentNode.dataset.id;
+                    let boardId = $("#boardId").val();
+                    let data = {
+                        "boardId" : boardId,
+                        "parentId" : parentId,
+                        "content" : content,
+                    };
+                    var param = JSON.stringify(data);
+                    $.ajax({
+                        url : "/comments/save",
+                        type : "post",
+                        contentType : "application/json",
+                        data : param,
+                        beforeSend : function(xhr) {
+                            xhr.setRequestHeader(header, token);
+                        },
+                        success : function (id) {
+                            alert("저장 하였습니다.");
+                            location.href='/faq/detail/' + id;
+                        },
+                        error : function(jqXHR, status, error) {
+                            if (jqXHR.status == '401') {
+                                alert("로그인 후 이용해 주세요.");
+                                location.href="/members/login";
+                            } else {
+                                alert(jqXHR.responseText);
+                            }
+                        }
+                    });
+                }
+            }
+
+            function mainUpdateColl(val) {
+                let updateCollBtn = val;
+                let parent = updateCollBtn.parentNode;
+                let mainCommentUpdateDiv = parent.getElementsByClassName("mainCommentUpdateDiv")[0];
+                let mainSaveBtn = document.getElementById("commentNew").getElementsByClassName("mainSaveBtn")[0];
+
+                let textarea = mainCommentUpdateDiv.getElementsByTagName("textarea")[0];
+
+                if (mainCommentUpdateDiv.style.display == "none") {
+                    let subCommentSaveDiv = parent.getElementsByClassName("subCommentSaveDiv")[0];
+                    let subCollBtn = parent.getElementsByClassName("subCollBtn")[0];
+                    let content = parent.getElementsByClassName("mainContent")[0]
+                            .getElementsByTagName("span")[0].textContent;
+                    textarea.value = content;
+                    subCommentSaveDiv.style.display = "none";
+                    subCollBtn.textContent = "답글 등록";
+
+                    mainCommentUpdateDiv.style.display = "block";
+                    mainSaveBtn.setAttribute("onClick", "#");
+                    updateCollBtn.textContent = "수정 취소";
+                } else {
+                    textarea.value = "";
+                    mainCommentUpdateDiv.style.display = "none";
+                    mainSaveBtn.setAttribute("onClick", "mainCommentSave()");
+                    updateCollBtn.textContent = "수정 등록";
+                }
+            }
+            function subCommentColl(val) {
+                let subCollBtn = val;
+                let parent = subCollBtn.parentNode;
+                let subCommentSaveDiv = parent.getElementsByClassName("subCommentSaveDiv")[0];
+                let mainSaveBtn = document.getElementById("commentNew").getElementsByClassName("mainSaveBtn")[0];
+
+                let textarea = subCommentSaveDiv.getElementsByTagName("textarea")[0];
+
+                if  (subCommentSaveDiv.style.display == "none") {
+                    let mainCommentUpdateDiv = parent.getElementsByClassName("mainCommentUpdateDiv")[0];
+                    let updateCollBtn = parent.getElementsByClassName("updateCollBtn")[0];
+                    textarea.value = "";
+                    mainCommentUpdateDiv.style.display = "none";
+                    updateCollBtn.textContent = "수정 등록";
+
+                    subCommentSaveDiv.style.display = "block";
+                    mainSaveBtn.setAttribute("onClick", "#");
+                    subCollBtn.textContent = "답글 취소";
+                } else {
+                    textarea.value = "";
+                    subCommentSaveDiv.style.display = "none";
+                    mainSaveBtn.setAttribute("onClick", "#");
+                    subCollBtn.textContent = "답글 등록";
+                }
+            }
+            function subUpdateColl(val) {
+                let updateCollBtn = val;
+                let parent = updateCollBtn.parentNode;
+                let subCommentUpdateDiv = parent.getElementsByClassName("subCommentUpdateDiv")[0];
+                let mainSaveBtn = document.getElementById("commentNew").getElementsByClassName("mainSaveBtn")[0];
+
+                let textarea = subCommentUpdateDiv.getElementsByTagName("textarea")[0];
+
+                if (subCommentUpdateDiv.style.display == "none") {
+                    let content = parent.getElementsByClassName("mainContent")[0]
+                            .getElementsByTagName("span")[0].textContent;
+                    textarea.value = content;
+
+                    subCommentUpdateDiv.style.display = "block";
+                    mainSaveBtn.setAttribute("onClick", "#");
+                    updateCollBtn.textContent = "수정 취소";
+                } else {
+                    textarea.value = "";
+                    subCommentUpdateDiv.style.display = "none";
+                    mainSaveBtn.setAttribute("onClick", "mainCommentSave()");
+                    updateCollBtn.textContent = "수정 등록";
+                }
+            }
+        </script>
+    </th:block>
+    <!-- 사용자 CSS 추가 -->
+    <th:block layout:fragment="css">
+        <style>
+            div{
+                text-align: left;
+                height: auto;
+            }
+            #content{
+                height: 400px;
+                resize: none;
+                line-height: 20px;
+                background-color : #f0f0f0;
+            }
+            .rounded-3 {
+                background-color : #D8D8D8;
+                height:55px;
+            }
+        </style>
+    </th:block>
+    <div layout:fragment="content">
+        <div class="container col-5 mb-5">
+            <div class="py-3 text-center">
+                <h2 th:text="${writeFormDto.title}"></h2>
+            </div>
+            <div class="rounded-3 mb-2">
+                <div class="row pt-3">
+                    <div class="col text-end">
+                        <span th:text="'작성자: ' + ${writeFormDto.writer}"></span>
+                    </div>
+                    <div class="col-2"></div>
+                    <div class="col text-start">
+                        <span th:text="'작성일: ' + ${writeFormDto.localDate}"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-floating mb-3">
+                <textarea readonly class="form-control-plaintext" id="content" th:text="${writeFormDto.content}"></textarea>
+            </div>
+            <hr class="my-4">
+            <div>
+                <input type="button" class="btn btn-secondary" onclick="location.href='/faq/boardLists'" value="목록">
+                <a class="btn btn-secondary" th:href="'/faq/boardDetail/'+${writeFormDto.id}"
+                   sec:authorize="hasAnyAuthority('ROLE_ADMIN')">수정</a>
+            </div>
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" th:value="${writeFormDto.id}" id="boardId">
+
+
+
+            <div class="mt-5">
+                <h4>댓글</h4>
+            </div>
+            <div id="boardComment">
+                <th:block th:each="mainComment : ${mainCommentList}">
+                    <div class="commentList mb-5">
+                        <div class="mainComm" th:data-id="${mainComment.id}">
+                            <div class="position-relative mb-3">
+                                <span th:text="${mainComment.memberName}" class="mainName h5 top-50 start-0"></span>
+                                <span th:text="${mainComment.upTime}" class="mainTime position-absolute top-0 end-0"></span>
+                            </div>
+                            <div class="mainContent">
+                                <span th:text="${mainComment.content}"></span>
+                            </div>
+                            <button class="subCollBtn btn btn-outline-secondary" onclick="subCommentColl(this)">답글 등록</button>
+                            <button class="updateCollBtn btn btn-outline-success" onclick="mainUpdateColl(this)">수정 등록</button>
+                            <button class="btn btn-outline-danger float-end" onclick="commentDelete(this)">삭제</button>
+                            <div class="subCommentSaveDiv mt-3 ms-5 mb-5" style="display: none;">
+                                <textarea class="form-control" style="resize: none; width: 600px;"></textarea>
+                                <button class="btn btn-outline-secondary m-2 float-end me-5" onclick="subCommentSave(this)">답글 등록</button>
+                            </div>
+                            <div class="mainCommentUpdateDiv mt-3 ms-5 mb-5" style="display: none;">
+                                <textarea class="form-control" style="resize: none; width: 600px;"></textarea>
+                                <button class="btn btn-outline-success m-2 float-end me-5" onclick="commentUpdate(this)">수정 등록</button>
+                            </div>
+                        </div>
+                        <th:block th:each="subComment : ${subCommentList}">
+                            <div th:if="${mainComment.id == subComment.parentId}" class="row row-cols-8 mb-2">
+                                <h5 class="col-1 text-end">&#8627;</h5>
+                                <div class="subComm col-10" th:data-id="${subComment.id}">
+                                    <div class="position-relative mb-3">
+                                        <span class="subName h5 top-50 start-0" th:text="${subComment.memberName}"></span>
+                                        <span class="subTime position-absolute top-0 end-0" th:text="${subComment.upTime}"></span>
+                                    </div>
+                                    <div class="mainContent">
+                                        <span th:text="${subComment.content}"></span>
+                                    </div>
+                                    <button class="updateCollBtn btn btn-outline-success" onclick="subUpdateColl(this)">수정 등록</button>
+                                    <button class="btn btn-outline-danger float-end" onclick="commentDelete(this)">삭제</button>
+                                    <div class="subCommentUpdateDiv mt-3 ms-5 mb-5" style="display: none;">
+                                        <textarea class="form-control" style="resize: none;"></textarea>
+                                        <button class="btn btn-outline-success m-2 float-end" onclick="commentUpdate(this)">수정 등록</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </th:block>
+                    </div>
+                </th:block>
+                <div id="commentNew">
+                    <textarea class="mainCommentContent form-control" placeholder="댓글 입력"></textarea>
+                    <button class="mainSaveBtn btn btn-outline-secondary float-end mt-2" onclick="mainCommentSave()">등록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</html>
